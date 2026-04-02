@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  couple-app:
+    build: .
+    container_name: couple-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - RABBITMQ_HOST=rabbitmq
+      - DB_URL=jdbc:postgresql://postgres:5432/couple_db
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - couple-network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=couple_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    networks:
+      - couple-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    env_file:
+      - .env
+    ports:
+      - "15672:15672"
+
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    networks:
+      - couple-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - couple-app
+    networks:
+      - couple-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - couple-network
+
+networks:
+  couple-network:
+    driver: bridge
