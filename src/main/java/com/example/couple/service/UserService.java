@@ -53,7 +53,7 @@ public class UserService {
     public void validate(UserCreateRequest userCreateRequest){
         boolean emailExists = userRepository.existsByEmail(userCreateRequest.getEmail());
         boolean usernameExists = userRepository.existsByUsername(userCreateRequest.getUsername());
-        if (emailExists | usernameExists){
+        if (emailExists || usernameExists){
             throw new BadRequestException("Böyle bir hesap var.");
         }
     }

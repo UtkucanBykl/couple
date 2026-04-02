@@ -1,18 +1,28 @@
 package com.example.couple.service;
 
 
+import com.example.couple.config.RabbitConfig;
+import com.example.couple.dto.event.CoupleCreatedNotificationEvent;
 import com.example.couple.dto.request.CoupleWriteRequest;
 import com.example.couple.dto.response.CoupleDetailResponse;
 import com.example.couple.dto.response.CoupleWriteResponse;
 import com.example.couple.entity.Couple;
+import com.example.couple.entity.OutboxEvent;
 import com.example.couple.entity.User;
+import com.example.couple.enums.OutboxAggregateType;
+import com.example.couple.enums.OutboxEventType;
+import com.example.couple.enums.OutboxStatus;
 import com.example.couple.exception.BadRequestException;
 import com.example.couple.mapper.CoupleMapper;
 import com.example.couple.repository.CoupleRepository;
+import com.example.couple.repository.OutboxRepository;
 import com.example.couple.repository.UserRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 
 
@@ -23,7 +33,8 @@ public class CoupleService {
     private final CoupleValidateService coupleValidateService;
     private final CoupleMapper coupleMapper;
     private final UserRepository userRepository;
-
+    private final ObjectMapper objectMapper;
+    private final OutboxRepository outboxRepository;
 
     @Transactional
     public CoupleWriteResponse createCouple(CoupleWriteRequest coupleWriteRequest, User user){
@@ -40,11 +51,30 @@ public class CoupleService {
         secondUser.setActiveCouple(couple);
         userRepository.save(user);
         userRepository.save(secondUser);
+
+        CoupleCreatedNotificationEvent coupleCreatedNotificationEvent = new CoupleCreatedNotificationEvent(
+                savedCouple.getId(), secondUser.getId()
+        );
+
+        OutboxEvent outboxEvent = new OutboxEvent();
+        outboxEvent.setEventType(OutboxEventType.COUPLE_CREATE);
+        outboxEvent.setAggregateType(OutboxAggregateType.COUPLE);
+        outboxEvent.setAggregateId(couple.getId());
+        outboxEvent.setStatus(OutboxStatus.PENDING);
+        outboxEvent.setPayload(toJsonNode(coupleCreatedNotificationEvent));
+        outboxEvent.setExchangeName(RabbitConfig.COUPLE_EXCHANGE);
+        outboxEvent.setRoutingKey(RabbitConfig.COUPLE_CREATED_ROUTING_KEY);
+        outboxRepository.save(outboxEvent);
+
         return coupleMapper.toCreateResponse(savedCouple);
     }
 
+    private JsonNode toJsonNode(Object value) {
+        return objectMapper.valueToTree(value);
+    }
+
     @Transactional
-    public void deleteCouple(Long id, User user) throws RuntimeException{
+    public void deleteCouple(Long id, User user) throws BadRequestException{
         Couple couple = coupleRepository.findCouple(id, user.getId())
                 .orElseThrow(() -> new BadRequestException("Böyle bir couple yok"));
         coupleRepository.delete(couple);

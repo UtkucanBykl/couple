@@ -1,32 +1,28 @@
 package com.example.couple.exception;
 
-import com.example.couple.dto.response.GlobalErrorResponse;
-import com.example.couple.mapper.GlobalErrorMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 @AllArgsConstructor
 public class GlobalExceptionHandler {
-    private final GlobalErrorMapper globalErrorMapper;
+  @ExceptionHandler(BadRequestException.class)
+  public ProblemDetail handleRuntimeException(RuntimeException ex) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+  }
 
+  @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+  public ProblemDetail handleValidationException(
+      org.springframework.web.bind.MethodArgumentNotValidException ex) {
+    String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
+  }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<GlobalErrorResponse> handleRuntimeException(RuntimeException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(globalErrorMapper.toResponse(ex.getMessage()));
-    }
-
-    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
-    public ResponseEntity<GlobalErrorResponse> handleValidationException(org.springframework.web.bind.MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(globalErrorMapper.toResponse(errorMessage));
-    }
+  @ExceptionHandler(Exception.class)
+  public ProblemDetail handleGlobalException(Exception ex) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Sistem hatası");
+  }
 }

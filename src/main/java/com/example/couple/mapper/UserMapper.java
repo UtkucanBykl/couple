@@ -1,6 +1,5 @@
 package com.example.couple.mapper;
 
-import com.example.couple.dto.request.UserLoginRequest;
 import com.example.couple.dto.response.UserCreateResponse;
 import com.example.couple.dto.response.UserLoginResponse;
 import com.example.couple.entity.User;
