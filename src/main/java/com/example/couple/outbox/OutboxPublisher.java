@@ -26,7 +26,19 @@ public class OutboxPublisher {
     for (OutboxEvent event : outboxEvents) {
       try {
         rabbitTemplate.convertAndSend(
-            event.getExchangeName(), event.getRoutingKey(), event.getPayload());
+            event.getExchangeName(),
+            event.getRoutingKey(),
+            event.getPayload(),
+            message -> {
+              message.getMessageProperties().setMessageId(String.valueOf(event.getId()));
+              message
+                  .getMessageProperties()
+                  .setHeader("original-exchange", event.getExchangeName());
+              message
+                  .getMessageProperties()
+                  .setHeader("original-routing-key", event.getRoutingKey());
+              return message;
+            });
         outboxService.markPublished(event.getId());
       } catch (Exception ex) {
         outboxService.markFailed(event.getId(), ex.toString());
