@@ -71,9 +71,4 @@ public class RabbitConfig {
       }
     };
   }
-
-  @Bean
-  public ApplicationRunner rabbitTestRunner(RabbitTemplate rabbitTemplate) {
-    return args -> rabbitTemplate.convertAndSend(COUPLE_EXCHANGE, "couple.created.test", "hello");
-  }
 }

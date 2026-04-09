@@ -31,7 +31,8 @@ public class DeadLetterConsumer {
 
 
     if (originalExchange == null || originalRoutingKey == null) {
-      throw new IllegalStateException("Original exchange/routing key not found");
+      log.error("Original exchange/routing key not found");
+      return;
     }
 
     message.getMessageProperties().incrementRetryCount();
