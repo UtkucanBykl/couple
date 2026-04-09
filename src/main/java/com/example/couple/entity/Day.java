@@ -29,4 +29,24 @@ public class Day extends BaseEntity {
   private String coverPhoto;
 
   @NotNull private LocalDate date;
+
+  public static Day create(
+      Couple couple, String name, String description, LocalDate date, String coverPhoto) {
+    if (couple == null) {
+      throw new IllegalArgumentException("Bir gün (Day) mutlaka bir çifte (Couple) ait olmalıdır.");
+    }
+    if (name == null || name.trim().length() < 3) {
+      throw new IllegalArgumentException("Gün adı en az 3 karakter olmalıdır.");
+    }
+    if (date == null) {
+      throw new IllegalArgumentException("Tarih boş olamaz.");
+    }
+    Day day = new Day();
+    day.setCouple(couple);
+    day.setName(name);
+    day.setCoverPhoto(coverPhoto);
+    day.setDate(date);
+    day.setDescription(description);
+    return day;
+  }
 }

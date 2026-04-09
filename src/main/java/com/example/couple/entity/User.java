@@ -24,4 +24,8 @@ public class User extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = "active_couple_id", nullable = true)
   private Couple activeCouple = null;
+
+  public boolean hasActiveCouple(){
+    return this.activeCouple != null;
+  }
 }

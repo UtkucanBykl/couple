@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -29,6 +31,9 @@ public class Couple extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "second_user_id", nullable = false)
   private User secondUser;
+
+  @OneToMany(mappedBy = "couple", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Day> days = new ArrayList<>();
 
   private LocalDate anniversaryDate;
 }
