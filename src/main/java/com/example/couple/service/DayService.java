@@ -10,6 +10,7 @@ import com.example.couple.exception.BadRequestException;
 import com.example.couple.mapper.DayMapper;
 import com.example.couple.repository.CoupleRepository;
 import com.example.couple.repository.DayRepository;
+import com.example.couple.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +21,13 @@ public class DayService {
     private final DayRepository dayRepository;
     private final DayMapper dayMapper;
     private final FileStorageService fileStorageService;
+    private final UserRepository userRepository;
 
     @Transactional
-    public DayWriteResponse createDay(DayWriteRequest dayWriteRequest, User user){
+    public DayWriteResponse createDay(DayWriteRequest dayWriteRequest, Long userId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new BadRequestException("Kullanıcı bulunamadı")
+        );
         if(!user.hasActiveCouple()){
             throw new BadRequestException("Kullanıcının couple yok");
         }

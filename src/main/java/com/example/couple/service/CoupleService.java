@@ -17,6 +17,7 @@ import com.example.couple.mapper.CoupleMapper;
 import com.example.couple.repository.CoupleRepository;
 import com.example.couple.repository.OutboxRepository;
 import com.example.couple.repository.UserRepository;
+import com.example.couple.security.CustomUserPrincipal;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,10 @@ public class CoupleService {
     private final OutboxRepository outboxRepository;
 
     @Transactional
-    public CoupleWriteResponse createCouple(CoupleWriteRequest coupleWriteRequest, User user){
+    public CoupleWriteResponse createCouple(CoupleWriteRequest coupleWriteRequest, Long userId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new BadRequestException("Kullanıcı bulunamadı")
+        );
         User secondUser = userRepository.findById(coupleWriteRequest.getSecondUserID()).orElseThrow(
                 () -> new BadRequestException("Kullanıcı bulunamadı")
         );
@@ -74,14 +78,17 @@ public class CoupleService {
     }
 
     @Transactional
-    public void deleteCouple(Long id, User user) throws BadRequestException{
-        Couple couple = coupleRepository.findCouple(id, user.getId())
+    public void deleteCouple(Long id, Long userId){
+        Couple couple = coupleRepository.findCouple(id, userId)
                 .orElseThrow(() -> new BadRequestException("Böyle bir couple yok"));
         coupleRepository.delete(couple);
     }
 
     @Transactional(readOnly = true)
-    public CoupleDetailResponse detailCouple(User user) throws BadRequestException {
+    public CoupleDetailResponse detailCouple(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new BadRequestException("Kullanıcı bulunamadı")
+        );
         Couple couple = coupleRepository.findCoupleByUserWithFetched(user.getId())
                 .orElseThrow(() -> new BadRequestException("Henüz aktif bir couple yok"));
         return coupleMapper.toDetailResponse(couple, user);

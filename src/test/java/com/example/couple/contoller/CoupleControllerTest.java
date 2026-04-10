@@ -1,13 +1,19 @@
 package com.example.couple.contoller;
 
+import com.example.couple.config.StaticResourceConfig;
 import com.example.couple.controller.CoupleController;
 import com.example.couple.dto.request.CoupleWriteRequest;
 
 import com.example.couple.dto.response.CoupleWriteResponse;
 import com.example.couple.dto.response.UserBasicResponse;
 import com.example.couple.entity.User;
+import com.example.couple.security.CustomUserPrincipal;
 import com.example.couple.security.JwtService;
 import com.example.couple.service.CoupleService;
+import com.example.couple.service.CoupleValidateService;
+import com.example.couple.service.FileStorageService;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -18,6 +24,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.file.attribute.UserPrincipal;
+
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,7 +33,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
-@WebMvcTest(CoupleController.class)
+@WebMvcTest(
+    controllers = CoupleController.class,
+    excludeFilters =
+        @ComponentScan.Filter(
+            type = FilterType.ASSIGNABLE_TYPE,
+            classes = StaticResourceConfig.class))
 @AutoConfigureMockMvc()
 class CoupleControllerTest {
   @Autowired private MockMvc mockMvc;
@@ -47,23 +60,26 @@ class CoupleControllerTest {
     user1.setPasswordHash("123");
 
     User user2 = new User();
-    user1.setId(2L);
-    user1.setUsername("user2");
-    user1.setEmail("user2@test.com");
-    user1.setPasswordHash("123");
+    user2.setId(2L);
+    user2.setUsername("user2");
+    user2.setEmail("user2@test.com");
+    user2.setPasswordHash("123");
 
     CoupleWriteRequest coupleWriteRequest = new CoupleWriteRequest();
     coupleWriteRequest.setSecondUserID(user2.getId());
     UserBasicResponse userBasicResponse = new UserBasicResponse(2L, "user2", "test2@test.com");
     CoupleWriteResponse response = new CoupleWriteResponse(2L, userBasicResponse);
-    given(coupleService.createCouple(any(CoupleWriteRequest.class), any(User.class)))
+    given(coupleService.createCouple(any(CoupleWriteRequest.class), any(Long.class)))
         .willReturn(response);
+
+    CustomUserPrincipal principal = new CustomUserPrincipal(1L, "user1", "123");
+
     mockMvc
         .perform(
             post("/api/v1/couples")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(coupleWriteRequest))
-                .with(user("user1").roles("USER"))
+                .with(user(principal))
                 .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(2));

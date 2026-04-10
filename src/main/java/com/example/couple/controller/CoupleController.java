@@ -4,6 +4,7 @@ import com.example.couple.dto.request.CoupleWriteRequest;
 import com.example.couple.dto.response.CoupleDetailResponse;
 import com.example.couple.dto.response.CoupleWriteResponse;
 import com.example.couple.entity.User;
+import com.example.couple.security.CustomUserPrincipal;
 import com.example.couple.service.CoupleService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
@@ -23,25 +24,25 @@ public class CoupleController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CoupleWriteResponse> createCouple(
             @Valid @RequestBody CoupleWriteRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserPrincipal user
     ) {
-        return ResponseEntity.ok(coupleService.createCouple(request, user));
+        return ResponseEntity.ok(coupleService.createCouple(request, user.getId()));
     }
 
     @DeleteMapping("/api/v1/couples/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Null> sayHello(
-            @PathVariable Long id, @AuthenticationPrincipal User user
+            @PathVariable Long id, @AuthenticationPrincipal CustomUserPrincipal user
     ) {
-        coupleService.deleteCouple(id, user);
+        coupleService.deleteCouple(id, user.getId());
         return ResponseEntity.ok(null);
     }
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CoupleDetailResponse> getCoupleDetail(
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserPrincipal user
     ) {
-        return ResponseEntity.ok(coupleService.detailCouple(user));
+        return ResponseEntity.ok(coupleService.detailCouple(user.getId()));
     }
 }
