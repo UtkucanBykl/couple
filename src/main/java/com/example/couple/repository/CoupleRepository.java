@@ -26,7 +26,7 @@ public interface CoupleRepository extends JpaRepository<Couple, Long> {
     Optional<Couple> findCouple(@Param("user1Id") Long user1Id,@Param("user2Id") Long user2Id);
 
     @Query(
-            "SELECT COUNT(a) > 1 FROM Couple a where " +
+            "SELECT COUNT(a) > 0 FROM Couple a where " +
                     "(a.firstUser.id = :userId and a.status = CoupleStatus.ACTIVE) OR"+
                     "(a.secondUser.id = :userId and a.status = CoupleStatus.ACTIVE)"
     )

@@ -45,7 +45,8 @@ public class DayService {
                 dayWriteRequest.getDate(),
                 path
         );
+        Day savedDay = dayRepository.save(day);
 
-        return dayMapper.toResponse(day);
+        return dayMapper.toResponse(savedDay);
     }
 }

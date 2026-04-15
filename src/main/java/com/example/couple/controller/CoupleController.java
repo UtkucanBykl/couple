@@ -29,9 +29,9 @@ public class CoupleController {
         return ResponseEntity.ok(coupleService.createCouple(request, user.getId()));
     }
 
-    @DeleteMapping("/api/v1/couples/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Null> sayHello(
+    public ResponseEntity<Null> deleteCouple(
             @PathVariable Long id, @AuthenticationPrincipal CustomUserPrincipal user
     ) {
         coupleService.deleteCouple(id, user.getId());
