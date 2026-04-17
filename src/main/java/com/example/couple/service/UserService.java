@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.couple.annotation.LogExecutionTime;
 import com.example.couple.dto.query.UserListSearchQuery;
 import com.example.couple.dto.request.UserLoginRequest;
 import com.example.couple.dto.response.UserCreateResponse;
@@ -90,6 +91,7 @@ public class UserService {
     return userMapper.toCreateResponse(savedUser, accessToken, refreshToken);
   }
 
+  @LogExecutionTime
   @Transactional()
   public UserLoginResponse loginUser(UserLoginRequest userLoginRequest) {
     Optional<User> optionalUser = userRepository.findByUsername(userLoginRequest.getUsername());
