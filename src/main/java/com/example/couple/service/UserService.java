@@ -1,18 +1,20 @@
 package com.example.couple.service;
 
 import java.security.SecureRandom;
-import java.util.List;
+
 import java.util.Optional;
 
 import com.example.couple.annotation.LogExecutionTime;
 import com.example.couple.dto.query.UserListSearchQuery;
 import com.example.couple.dto.request.UserLoginRequest;
+import com.example.couple.dto.response.RefreshTokenResponse;
 import com.example.couple.dto.response.UserCreateResponse;
 import com.example.couple.dto.response.UserSearchResponse;
 import com.example.couple.dto.response.UserLoginResponse;
 import com.example.couple.exception.BadRequestException;
 import com.example.couple.mapper.UserMapper;
 import com.example.couple.security.JwtService;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,23 +26,14 @@ import com.example.couple.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class UserService {
   private final UserRepository userRepository;
   private static final SecureRandom random = new SecureRandom();
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
   private final JwtService jwtService;
-
-  public UserService(
-      UserRepository userRepository,
-      PasswordEncoder passwordEncoder,
-      UserMapper userMapper,
-      JwtService jwtService) {
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.userMapper = userMapper;
-    this.jwtService = jwtService;
-  }
+  private final RefreshTokenService refreshTokenService;
 
   public String createFriendCode() {
     while (true) {
@@ -86,9 +79,10 @@ public class UserService {
     user.setFriendCode(friendCode);
     user.setPasswordHash(this.hashPassword(userCreateRequest.getPassword()));
     User savedUser = userRepository.save(user);
-    String accessToken = jwtService.generateToken(savedUser.getUsername());
-    String refreshToken = jwtService.generateRefreshToken(savedUser.getUsername());
-    return userMapper.toCreateResponse(savedUser, accessToken, refreshToken);
+    RefreshTokenResponse tokenResponse = refreshTokenService.issueTokens(savedUser);
+
+    return userMapper.toCreateResponse(
+        savedUser, tokenResponse.accessToken(), tokenResponse.refreshToken());
   }
 
   @LogExecutionTime
@@ -103,9 +97,9 @@ public class UserService {
     if (!isPasswordValid) {
       throw new BadRequestException("Parola yanlış");
     }
-    String accessToken = jwtService.generateToken(user.getUsername());
-    String refreshToken = jwtService.generateRefreshToken(user.getUsername());
-    return userMapper.toLoginResponse(user, accessToken, refreshToken);
+    RefreshTokenResponse tokenResponse = refreshTokenService.issueTokens(user);
+    return userMapper.toLoginResponse(
+        user, tokenResponse.accessToken(), tokenResponse.refreshToken());
   }
 
   @Transactional(readOnly = true)

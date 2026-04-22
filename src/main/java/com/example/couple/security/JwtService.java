@@ -2,6 +2,7 @@ package com.example.couple.security;
 
 import com.example.couple.config.JwtProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -11,11 +12,17 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 
 @AllArgsConstructor
 @Service
 public class JwtService {
+
+  private static final String TOKEN_TYPE_CLAIM = "token_type";
+  private static final String TOKEN_TYPE_ACCESS = "access";
+  private static final String TOKEN_TYPE_REFRESH = "refresh";
+  private static final String JTI_CLAIM = "jti";
 
   private final JwtProperties jwtProperties;
 
@@ -32,11 +39,17 @@ public class JwtService {
   }
 
   public String generateToken(String username) {
-    return buildToken(new HashMap<>(), username, getExpiration());
+    Map<String, Object> claims = new HashMap<>();
+    claims.put(TOKEN_TYPE_CLAIM, TOKEN_TYPE_ACCESS);
+    claims.put(JTI_CLAIM, UUID.randomUUID().toString());
+    return buildToken(claims, username, getExpiration());
   }
 
   public String generateRefreshToken(String username) {
-    return buildToken(new HashMap<>(), username, getRefreshExpiration());
+    Map<String, Object> claims = new HashMap<>();
+    claims.put(TOKEN_TYPE_CLAIM, TOKEN_TYPE_REFRESH);
+    claims.put(JTI_CLAIM, UUID.randomUUID().toString());
+    return buildToken(claims, username, getRefreshExpiration());
   }
 
   private String buildToken(Map<String, Object> extraClaims, String username, long expiration) {
@@ -53,9 +66,54 @@ public class JwtService {
     return extractClaim(token, Claims::getSubject);
   }
 
+  public String extractTokenType(String token) {
+    return extractAllClaims(token).get(TOKEN_TYPE_CLAIM, String.class);
+  }
+
+  public String extractJti(String token) {
+    return extractAllClaims(token).get(JTI_CLAIM, String.class);
+  }
+
+  public boolean isAccessToken(String token) {
+    return TOKEN_TYPE_ACCESS.equals(extractTokenType(token));
+  }
+
+  public boolean isRefreshToken(String token) {
+    return TOKEN_TYPE_REFRESH.equals(extractTokenType(token));
+  }
+
   public boolean isTokenValid(String token, String username) {
-    final String extractedUsername = extractUsername(token);
-    return (extractedUsername.equals(username)) && !isTokenExpired(token);
+    try {
+      final String extractedUsername = extractUsername(token);
+      return extractedUsername.equals(username) && !isTokenExpired(token);
+    } catch (JwtException | IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  public boolean isTokenValid(String token) {
+    try {
+      extractAllClaims(token);
+      return !isTokenExpired(token);
+    } catch (JwtException | IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  public boolean isRefreshTokenValid(String token) {
+    try {
+      return isTokenValid(token) && isRefreshToken(token);
+    } catch (JwtException | IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  public boolean isAccessTokenValid(String token){
+    try {
+      return isTokenValid(token) && isAccessToken(token);
+    } catch (JwtException | IllegalArgumentException e) {
+      return false;
+    }
   }
 
   private boolean isTokenExpired(String token) {
