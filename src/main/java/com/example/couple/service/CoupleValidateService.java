@@ -8,20 +8,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class CoupleValidateService{
+public class CoupleValidateService {
+
     private final CoupleRepository coupleRepository;
 
-    public void validate(User firstUser, User secondUser){
-        boolean hasFirstUserCouple = coupleRepository.existsByUserActiveCouple(firstUser.getId());
-        if(hasFirstUserCouple){
-            throw new BadRequestException("Aktif bir couple olabilir");
-        }
-        boolean hasSecondUserCouple = coupleRepository.existsByUserActiveCouple(secondUser.getId());
-        if(hasSecondUserCouple){
-            throw new BadRequestException("Aktif bir couple olabilir");
-        }
-        boolean isExists = coupleRepository.existsRelation(firstUser, secondUser);
-        if(isExists){
+    public void validate(User firstUser, User secondUser) {
+        boolean exists = coupleRepository.existsRelation(firstUser, secondUser);
+        if (exists) {
             throw new BadRequestException("Zaten arkadaşlık var");
         }
     }

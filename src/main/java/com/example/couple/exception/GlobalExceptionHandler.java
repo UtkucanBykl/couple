@@ -14,6 +14,11 @@ public class GlobalExceptionHandler {
     return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
   }
 
+  @ExceptionHandler(DomainException.class)
+  public ProblemDetail handleDomainException(RuntimeException ex){
+    return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+  }
+
   @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
   public ProblemDetail handleValidationException(
       org.springframework.web.bind.MethodArgumentNotValidException ex) {

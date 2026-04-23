@@ -1,5 +1,6 @@
 package com.example.couple.entity;
 
+import com.example.couple.exception.DomainException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,5 +28,29 @@ public class User extends BaseEntity {
 
   public boolean hasActiveCouple(){
     return this.activeCouple != null;
+  }
+
+  public void attachActiveCouple(Couple couple) {
+    if (couple == null) {
+      throw new DomainException("Couple boş olamaz");
+    }
+    if (this.activeCouple != null) {
+      throw new DomainException("Kullanıcının aktif couple var");
+    }
+    this.activeCouple = couple;
+  }
+
+  public void detachActiveCouple(Couple couple) {
+    if (couple == null) {
+      throw new DomainException("Couple boş olamaz");
+    }
+    if (this.activeCouple == null) {
+      throw new DomainException("Kullanıcının aktif couple yok");
+    }
+
+    if(this.getActiveCouple().getId().equals(couple.getId())){
+      throw new DomainException("Kullanıcının aktif couple farklı");
+    }
+    this.activeCouple = null;
   }
 }
