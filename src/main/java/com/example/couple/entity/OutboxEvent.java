@@ -5,6 +5,7 @@ import com.example.couple.enums.OutboxEventType;
 import com.example.couple.enums.OutboxStatus;
 import com.example.couple.exception.DomainException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -13,9 +14,7 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "outbox_events")
 @Getter
-@Setter
-@NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OutboxEvent extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private OutboxAggregateType aggregateType;
@@ -58,7 +57,7 @@ public class OutboxEvent extends BaseEntity {
     if (aggregateId == null) {
       throw new DomainException("Outbox aggregate id boş olamaz");
     }
-    if (payload == null) {
+    if (payload == null || payload.isNull()) {
       throw new DomainException("Outbox payload boş olamaz");
     }
     if (exchangeName == null || exchangeName.isBlank()) {
@@ -89,15 +88,23 @@ public class OutboxEvent extends BaseEntity {
         eventType, aggregateType, aggregateId, payload, exchangeName, routingKey);
   }
 
-  public void markSent() {
+  public void markPublished() {
     this.status = OutboxStatus.PUBLISHED;
     this.lastError = null;
   }
 
   public void markFailed(String errorMessage) {
-    this.status = OutboxStatus.PENDING;
+    this.markFailed(errorMessage, 5);
+  }
+
+  public void markFailed(String errorMessage, int maxRetryCount) {
     this.retryCount++;
     this.lastError = errorMessage;
+    if (this.retryCount >= maxRetryCount) {
+      this.status = OutboxStatus.FAILED;
+    } else {
+      this.status = OutboxStatus.PENDING;
+    }
   }
 
   public void markDead(String errorMessage) {

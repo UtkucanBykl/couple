@@ -7,16 +7,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-@AllArgsConstructor
 public class GlobalExceptionHandler {
   @ExceptionHandler(BadRequestException.class)
-  public ProblemDetail handleRuntimeException(RuntimeException ex) {
+  public ProblemDetail handleRuntimeException(BadRequestException ex) {
     return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
   }
 
   @ExceptionHandler(DomainException.class)
-  public ProblemDetail handleDomainException(RuntimeException ex){
+  public ProblemDetail handleDomainException(DomainException ex){
     return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public ProblemDetail handleNotFoundException(NotFoundException ex){
+    return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
   @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)

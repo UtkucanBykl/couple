@@ -3,8 +3,7 @@ package com.example.couple.service;
 import com.example.couple.entity.OutboxEvent;
 import com.example.couple.enums.OutboxAggregateType;
 import com.example.couple.enums.OutboxEventType;
-import com.example.couple.enums.OutboxStatus;
-import com.example.couple.exception.BadRequestException;
+import com.example.couple.exception.NotFoundException;
 import com.example.couple.repository.OutboxRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,28 +17,22 @@ public class OutboxService {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
+    private OutboxEvent getOutboxEvent(Long eventId) {
+    return outboxRepository
+        .findById(eventId)
+        .orElseThrow(() -> new NotFoundException("Event bulunamadı"));
+    }
+
     @Transactional
     public void markPublished(Long eventId){
-        OutboxEvent event = outboxRepository.findById(eventId).orElseThrow(
-                () -> new BadRequestException("Event bulunamadı")
-        );
-        event.setStatus(OutboxStatus.PUBLISHED);
-        outboxRepository.save(event);
+        OutboxEvent event = this.getOutboxEvent(eventId);
+        event.markPublished();
     }
 
     @Transactional
     public void markFailed(Long eventId, String error){
-        OutboxEvent event = outboxRepository.findById(eventId).orElseThrow(
-                () -> new BadRequestException("Event bulunamadı")
-        );
-        event.setStatus(OutboxStatus.PENDING);
-        event.setRetryCount(event.getRetryCount()+1);
-        event.setLastError(error);
-        outboxRepository.save(event);
-    }
-
-    public JsonNode toJsonNode(Object value) {
-        return objectMapper.valueToTree(value);
+        OutboxEvent event = this.getOutboxEvent(eventId);
+        event.markFailed(error);
     }
 
     @Transactional
@@ -55,7 +48,7 @@ public class OutboxService {
                 eventType,
                 aggregateType,
                 aggregateId,
-                toJsonNode(payload),
+                objectMapper.valueToTree(payload),
                 exchangeName,
                 routingKey
         );
