@@ -2,7 +2,6 @@ package com.example.couple.controller;
 
 import com.example.couple.dto.request.DayWriteRequest;
 import com.example.couple.dto.response.DayWriteResponse;
-import com.example.couple.entity.User;
 import com.example.couple.security.CustomUserPrincipal;
 import com.example.couple.service.DayService;
 import jakarta.validation.Valid;

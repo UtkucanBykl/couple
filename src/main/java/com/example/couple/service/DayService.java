@@ -8,7 +8,6 @@ import com.example.couple.entity.Day;
 import com.example.couple.entity.User;
 import com.example.couple.exception.BadRequestException;
 import com.example.couple.mapper.DayMapper;
-import com.example.couple.repository.CoupleRepository;
 import com.example.couple.repository.DayRepository;
 import com.example.couple.repository.UserRepository;
 import lombok.AllArgsConstructor;

@@ -10,8 +10,6 @@ import com.example.couple.entity.User;
 import com.example.couple.security.CustomUserPrincipal;
 import com.example.couple.security.JwtService;
 import com.example.couple.service.CoupleService;
-import com.example.couple.service.CoupleValidateService;
-import com.example.couple.service.FileStorageService;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
@@ -24,7 +22,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.nio.file.attribute.UserPrincipal;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;

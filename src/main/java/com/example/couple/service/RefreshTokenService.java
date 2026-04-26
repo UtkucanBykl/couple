@@ -11,7 +11,6 @@ import com.example.couple.repository.RefreshTokenRepository;
 import com.example.couple.security.JwtService;
 import com.example.couple.util.TokenHashUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

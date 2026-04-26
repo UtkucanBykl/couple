@@ -5,7 +5,6 @@ import com.example.couple.entity.User;
 import com.example.couple.repository.UserRepository;
 import com.example.couple.security.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

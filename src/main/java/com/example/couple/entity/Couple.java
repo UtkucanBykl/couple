@@ -79,4 +79,5 @@ public class Couple extends BaseEntity {
     requireFirstUser().detachActiveCouple(this);
     requireSecondUser().detachActiveCouple(this);
   }
+
 }

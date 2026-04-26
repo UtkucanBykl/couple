@@ -1,8 +1,5 @@
 package com.example.couple.util;
 
-import jakarta.persistence.Column;
-import org.springframework.stereotype.Component;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

@@ -50,7 +50,7 @@ class RefreshTokenIntegrationTest {
     userRepository.saveAndFlush(user);
 
     String refreshToken = jwtService.generateRefreshToken(user.getUsername());
-    ;
+
     refreshTokenRepository.save(
         RefreshToken.create(TokenHashUtil.sha256(refreshToken), user, Instant.now().plusSeconds(36000)));
 
