@@ -13,7 +13,7 @@ import com.example.couple.dto.response.UserSearchResponse;
 import com.example.couple.dto.response.UserLoginResponse;
 import com.example.couple.exception.BadRequestException;
 import com.example.couple.mapper.UserMapper;
-import com.example.couple.security.JwtService;
+import com.example.couple.observability.UserMetrics;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,8 +32,8 @@ public class UserService {
   private static final SecureRandom random = new SecureRandom();
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
-  private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
+  private final UserMetrics userMetrics;
 
   public String createFriendCode() {
     while (true) {
@@ -73,11 +73,12 @@ public class UserService {
   public UserCreateResponse createUser(UserCreateRequest userCreateRequest) {
     this.validate(userCreateRequest);
     String friendCode = this.createFriendCode();
-    User user = new User();
-    user.setEmail(userCreateRequest.getEmail());
-    user.setUsername(userCreateRequest.getUsername());
-    user.setFriendCode(friendCode);
-    user.setPasswordHash(this.hashPassword(userCreateRequest.getPassword()));
+    User user = User.create(
+            userCreateRequest.getUsername(),
+            userCreateRequest.getEmail(),
+            this.hashPassword(userCreateRequest.getPassword()),
+            friendCode
+    );
     User savedUser = userRepository.save(user);
     RefreshTokenResponse tokenResponse = refreshTokenService.issueTokens(savedUser);
 
@@ -95,6 +96,7 @@ public class UserService {
     User user = optionalUser.get();
     boolean isPasswordValid = checkPassword(userLoginRequest.getPassword(), user.getPasswordHash());
     if (!isPasswordValid) {
+      userMetrics.increaseLoginPasswordUnmatch();
       throw new BadRequestException("Parola yanlış");
     }
     RefreshTokenResponse tokenResponse = refreshTokenService.issueTokens(user);

@@ -50,17 +50,19 @@ class CoupleControllerTest {
 
   @Test
   void shouldCreateCouple() throws Exception {
-    User user1 = new User();
-    user1.setId(1L);
-    user1.setUsername("user1");
-    user1.setEmail("user1@test.com");
-    user1.setPasswordHash("123");
+    User.create(
+            "user1",
+            "user2@test.com",
+            "1234",
+            "1234"
+    );
 
-    User user2 = new User();
-    user2.setId(2L);
-    user2.setUsername("user2");
-    user2.setEmail("user2@test.com");
-    user2.setPasswordHash("123");
+    User user2 = User.create(
+            "user2",
+            "user2@test.com",
+            "1234",
+            "1234"
+    );
 
     CoupleWriteRequest coupleWriteRequest = new CoupleWriteRequest();
     coupleWriteRequest.setSecondUserID(user2.getId());

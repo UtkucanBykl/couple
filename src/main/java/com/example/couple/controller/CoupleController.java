@@ -31,7 +31,7 @@ public class CoupleController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Null> deleteCouple(
+    public ResponseEntity<Void> deleteCouple(
             @PathVariable Long id, @AuthenticationPrincipal CustomUserPrincipal user
     ) {
         coupleService.deleteCouple(id, user.getId());

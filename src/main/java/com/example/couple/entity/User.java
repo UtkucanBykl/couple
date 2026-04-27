@@ -7,7 +7,6 @@ import lombok.*;
 @Entity
 @Table(name = "users")
 @Getter
-@Setter
 @NoArgsConstructor
 public class User extends BaseEntity {
   @Column(nullable = false, unique = true)
@@ -25,6 +24,13 @@ public class User extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = "active_couple_id", nullable = true)
   private Couple activeCouple = null;
+
+  private User(String username, String email, String passwordHash, String friendCode) {
+    this.username = username;
+    this.email = email;
+    this.passwordHash = passwordHash;
+    this.friendCode = friendCode;
+  }
 
   public boolean hasActiveCouple(){
     return this.activeCouple != null;
@@ -52,5 +58,9 @@ public class User extends BaseEntity {
       throw new DomainException("Kullanıcının aktif couple farklı");
     }
     this.activeCouple = null;
+  }
+
+  public static User create(String username, String email, String passwordHash, String friendCode) {
+    return new User(username, email, passwordHash, friendCode);
   }
 }

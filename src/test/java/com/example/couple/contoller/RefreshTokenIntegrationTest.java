@@ -42,11 +42,12 @@ class RefreshTokenIntegrationTest {
 
   @Test
   void shouldReturnNewRefreshTokenWhenRefreshTokenIsValid() throws Exception {
-    User user = new User();
-    user.setUsername("user1");
-    user.setEmail("user1@test.com");
-    user.setPasswordHash("hashed_password");
-    user.setFriendCode("12345");
+    User user = User.create(
+            "user2",
+            "user2@test.com",
+            "1234",
+            "1234"
+    );
     userRepository.saveAndFlush(user);
 
     String refreshToken = jwtService.generateRefreshToken(user.getUsername());

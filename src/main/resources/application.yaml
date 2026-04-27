@@ -46,3 +46,7 @@ app:
   upload:
     dir: ./uploads
     media-url: /uploads/
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"

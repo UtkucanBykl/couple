@@ -41,18 +41,20 @@ class CoupleAndDayIntegrationTest {
 
   @Test
   void shouldCreateDay() throws Exception {
-    User user1 = new User();
-    user1.setUsername("user1");
-    user1.setEmail("user1@test.com");
-    user1.setPasswordHash("hashed_password");
-    user1.setFriendCode("12345");
+    User user1 = User.create(
+            "user1",
+            "user1@test.com",
+            "hashed_password",
+            "12345"
+    );
     userRepository.save(user1);
 
-    User user2 = new User();
-    user2.setUsername("user2");
-    user2.setEmail("user2@test.com");
-    user2.setPasswordHash("hashed_password");
-    user2.setFriendCode("123456");
+    User user2 = User.create(
+            "user2",
+            "user2@test.com",
+            "hashed_password",
+            "12344"
+    );
     userRepository.save(user2);
 
     String accessToken = jwtService.generateToken(user1.getUsername());
