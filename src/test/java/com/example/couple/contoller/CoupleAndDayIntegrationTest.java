@@ -22,11 +22,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ActiveProfiles("test")
-@SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class CoupleAndDayIntegrationTest {
+class CoupleAndDayIntegrationTest extends BaseIntegrationTest {
   @Autowired
   private MockMvc mockMvc;
 

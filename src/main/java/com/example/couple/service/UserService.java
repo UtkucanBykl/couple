@@ -117,4 +117,9 @@ public class UserService {
         queryParameters.emailOrNull(),
         pageable);
   }
+
+  @Transactional(readOnly = true)
+  public Optional<User> findById(Long id) {
+    return userRepository.findById(id);
+  }
 }

@@ -15,10 +15,12 @@ public class RabbitConfig {
 
   public static final String COUPLE_EXCHANGE = "couple.exchange";
   public static final String COUPLE_QUEUE = "couple.queue";
-  public static final String COUPLE_CREATED_ROUTING_KEY = "couple.#";
+  public static final String COUPLE_ROUTING_PATTERN = "couple.#";
   public static final String DEADLETTER_EXCHANGE = "couple.dlx";
   public static final String DEADLETTER_ROUTING_KEY = "couple.dlq";
   public static final String DEADLETTER_QUEUE = "couple.dl.queue";
+  public static final String COUPLE_INVITE_CREATED_ROUTING_KEY = "couple.invite.created";
+  public static final String COUPLE_CREATED_ROUTING_KEY = "couple.created";
 
   @Bean
   public TopicExchange coupleExchange() {
@@ -54,7 +56,7 @@ public class RabbitConfig {
   public Binding coupleCreatedBinding(
       @Qualifier("coupleQueue") Queue coupleQueue,
       @Qualifier("coupleExchange") TopicExchange coupleExchange) {
-    return BindingBuilder.bind(coupleQueue).to(coupleExchange).with(COUPLE_CREATED_ROUTING_KEY);
+    return BindingBuilder.bind(coupleQueue).to(coupleExchange).with(COUPLE_ROUTING_PATTERN);
   }
 
   @Bean

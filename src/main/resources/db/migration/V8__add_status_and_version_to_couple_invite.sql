@@ -1,0 +1,5 @@
+ALTER TABLE couple_invite
+    ADD status VARCHAR(255) NOT NULL DEFAULT 'PENDING';
+
+ALTER TABLE couple_invite
+    ADD version BIGINT NOT NULL DEFAULT 0;

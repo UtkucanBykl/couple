@@ -48,6 +48,8 @@ dependencies {
 
 	testCompileOnly("org.projectlombok:lombok:1.18.44")
 	testAnnotationProcessor("org.projectlombok:lombok:1.18.44")
+	testImplementation "org.testcontainers:junit-jupiter"
+	testImplementation "org.testcontainers:postgresql"
 }
 
 checkstyle {
