@@ -6,7 +6,6 @@ import com.example.couple.dto.request.CoupleWriteRequest;
 
 import com.example.couple.dto.response.CoupleWriteResponse;
 import com.example.couple.dto.response.UserBasicResponse;
-import com.example.couple.entity.User;
 import com.example.couple.security.CustomUserPrincipal;
 import com.example.couple.security.JwtService;
 import com.example.couple.service.CoupleService;
@@ -50,22 +49,8 @@ class CoupleControllerTest {
 
   @Test
   void shouldCreateCouple() throws Exception {
-    User.create(
-            "user1",
-            "user2@test.com",
-            "1234",
-            "1234"
-    );
-
-    User user2 = User.create(
-            "user2",
-            "user2@test.com",
-            "1234",
-            "1234"
-    );
-
     CoupleWriteRequest coupleWriteRequest = new CoupleWriteRequest();
-    coupleWriteRequest.setSecondUserID(user2.getId());
+    coupleWriteRequest.setSecondUserID(2L);
     UserBasicResponse userBasicResponse = new UserBasicResponse(2L, "user2", "test2@test.com");
     CoupleWriteResponse response = new CoupleWriteResponse(2L, userBasicResponse);
     given(coupleService.createCouple(any(CoupleWriteRequest.class), any(Long.class)))
